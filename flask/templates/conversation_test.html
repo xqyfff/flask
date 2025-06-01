@@ -1,0 +1,115 @@
+{#<!DOCTYPE html>#}
+{#<html lang="zh">#}
+{#<head>#}
+{#  <meta charset="UTF-8">#}
+{#  <title>对话列表</title>#}
+{#</head>#}
+{#<body>#}
+{#  <h1>对话列表</h1>#}
+{#  <ul id="conversation-list"></ul>#}
+{##}
+{#  <script>#}
+{#    function loadConversations() {#}
+{#      fetch('http://127.0.0.1:5000/llm/list', {#}
+{#        method: 'GET',#}
+{#        credentials: 'include'#}
+{#      })#}
+{#      .then(response => response.json())#}
+{#      .then(data => {#}
+{#        const list = document.getElementById('conversation-list');#}
+{#        list.innerHTML = '';#}
+{#        const items = data.data || [];#}
+{##}
+{#        if (items.length === 0) {#}
+{#          list.innerHTML = '<li>暂无对话</li>';#}
+{#          return;#}
+{#        }#}
+{##}
+{#        items.forEach(item => {#}
+{#          const li = document.createElement('li');#}
+{#          const a = document.createElement('a');#}
+{#          a.href = `chat.html?conversation_id=${encodeURIComponent(item.conversation_id)}`;#}
+{#          a.textContent = `[${item.summary || '无摘要'}] ${item.conversation_id}`;#}
+{#          li.appendChild(a);#}
+{#          list.appendChild(li);#}
+{#        });#}
+{#      })#}
+{#      .catch(error => {#}
+{#        alert("加载对话失败: " + error.message);#}
+{#      });#}
+{#    }#}
+{##}
+{#    window.onload = loadConversations;#}
+{#  </script>#}
+{#</body>#}
+{#</html>#}
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>对话列表</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-200 min-h-screen">
+
+  <!-- 顶部导航 -->
+  <header class="bg-white/80 backdrop-blur-sm shadow-md py-4 px-6 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="w-32 h-12 ">
+      <h1 class="text-2xl font-bold text-gray-800">对话列表</h1>
+    </div>
+    <a href="{{ url_for('home') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+      返回主页
+    </a>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="max-w-3xl mx-auto mt-10 bg-white/90 rounded-xl shadow-lg p-6">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">历史对话</h2>
+    <ul id="conversation-list" class="space-y-3">
+      <!-- 动态添加的对话项 -->
+    </ul>
+  </main>
+
+  <!-- 脚本部分 -->
+  <script>
+    function loadConversations() {
+      fetch('/llm/list', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      .then(response => response.json())
+      .then(data => {
+        const list = document.getElementById('conversation-list');
+        list.innerHTML = '';
+        const items = data.data || [];
+
+        if (items.length === 0) {
+          list.innerHTML = '<li class="text-gray-500">📭 暂无对话记录</li>';
+          return;
+        }
+
+        items.forEach(item => {
+          const li = document.createElement('li');
+          li.className = "bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-3 transition shadow";
+
+          const a = document.createElement('a');
+          a.href = `chat.html?conversation_id=${encodeURIComponent(item.conversation_id)}`;
+          a.className = "text-blue-600 font-medium hover:underline";
+          a.textContent = `[${item.summary || '无摘要'}] ${item.conversation_id}`;
+
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+      })
+      .catch(error => {
+        alert("加载对话失败: " + error.message);
+      });
+    }
+
+    window.onload = loadConversations;
+  </script>
+</body>
+</html>

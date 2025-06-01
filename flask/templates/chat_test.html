@@ -1,0 +1,390 @@
+{#<!DOCTYPE html>#}
+{#<html lang="zh">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>聊天界面</title>#}
+{#    <style>#}
+{#        body {#}
+{#            font-family: Arial;#}
+{#            margin: 0;#}
+{#            display: flex;#}
+{#            height: 100vh;#}
+{#            background: #f5f5f5;#}
+{#        }#}
+{##}
+{#        #sidebar {#}
+{#            width: 200px;#}
+{#            background: #ddd;#}
+{#            padding: 10px;#}
+{#            box-sizing: border-box;#}
+{#            overflow-y: auto;#}
+{#        }#}
+{##}
+{#        #sidebar h4 {#}
+{#            margin-top: 0;#}
+{#        }#}
+{##}
+{#        #sidebar ul {#}
+{#            list-style: none;#}
+{#            padding-left: 0;#}
+{#        }#}
+{##}
+{#        #sidebar li {#}
+{#            margin: 8px 0;#}
+{#            cursor: pointer;#}
+{#            background: #fff;#}
+{#            padding: 5px;#}
+{#            border-radius: 4px;#}
+{#        }#}
+{##}
+{#        #chat-container {#}
+{#            flex: 1;#}
+{#            display: flex;#}
+{#            flex-direction: column;#}
+{#            padding: 20px;#}
+{#        }#}
+{##}
+{#        #messages {#}
+{#            flex: 1;#}
+{#            overflow-y: auto;#}
+{#            display: flex;#}
+{#            flex-direction: column;#}
+{#            gap: 6px;#}
+{#            background: #fff;#}
+{#            padding: 10px;#}
+{#            border-radius: 8px;#}
+{#        }#}
+{##}
+{#        .message {#}
+{#            padding: 8px 12px;#}
+{#            border-radius: 6px;#}
+{#            max-width: 80%;#}
+{#        }#}
+{##}
+{#        .user {#}
+{#            background-color: #d1e7dd;#}
+{#            align-self: flex-end;#}
+{#        }#}
+{##}
+{#        .assistant {#}
+{#            background-color: #f8d7da;#}
+{#            align-self: flex-start;#}
+{#        }#}
+{##}
+{#        #input-box {#}
+{#            display: flex;#}
+{#            margin-top: 10px;#}
+{#        }#}
+{##}
+{#        #query {#}
+{#            flex: 1;#}
+{#            padding: 8px;#}
+{#            font-size: 16px;#}
+{#        }#}
+{##}
+{#        #send-btn {#}
+{#            padding: 8px 12px;#}
+{#        }#}
+{#    </style>#}
+{#</head>#}
+{#<body>#}
+{#<div id="sidebar">#}
+{#    <h4>对话列表</h4>#}
+{#    <button onclick="createNewConversation()">新建对话</button>#}
+{#    <ul id="conversation-list"></ul>#}
+{#</div>#}
+{##}
+{#<div id="chat-container">#}
+{#    <h2>Chat with Assistant</h2>#}
+{#    <div id="messages"></div>#}
+{#    <div id="input-box">#}
+{#        <input type="text" id="query" placeholder="请输入你的问题">#}
+{#        <button id="send-btn" onclick="sendMessage()">发送</button>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<script>#}
+{#    const messagesContainer = document.getElementById('messages');#}
+{#    const conversationId = getConversationIdFromUrl();#}
+{##}
+{#    function getConversationIdFromUrl() {#}
+{#        const params = new URLSearchParams(window.location.search);#}
+{#        return params.get('conversation_id') || '';#}
+{#    }#}
+{##}
+{#    function generateRandomId(length) {#}
+{#        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';#}
+{#        let result = '';#}
+{#        for (let i = 0; i < length; i++) {#}
+{#            result += chars.charAt(Math.floor(Math.random() * chars.length));#}
+{#        }#}
+{#        return result;#}
+{#    }#}
+{##}
+{#    function createNewConversation() {#}
+{#        const newId = generateRandomId(10);#}
+{#        fetch('/llm/create_conversation', {#}
+{#            method: 'POST',#}
+{#            credentials: 'include',#}
+{#            headers: { 'Content-Type': 'application/json' },#}
+{#            body: JSON.stringify({#}
+{#                conversation_id: newId,#}
+{#                summary: '新会话'#}
+{#            })#}
+{#        })#}
+{#        .then(res => res.json())#}
+{#        .then(() => {#}
+{#            window.location.href = `/chat_test?conversation_id=${encodeURIComponent(newId)}`;#}
+{#        })#}
+{#        .catch(err => alert("创建失败: " + err.message));#}
+{#    }#}
+{##}
+{#    function loadConversationList() {#}
+{#        fetch('/llm/list', { credentials: 'include' })#}
+{#        .then(res => res.json())#}
+{#        .then(data => {#}
+{#            const list = document.getElementById('conversation-list');#}
+{#            list.innerHTML = '';#}
+{#            (data.data || []).forEach(item => {#}
+{#                const li = document.createElement('li');#}
+{#                li.textContent = item.summary || item.conversation_id;#}
+{#                li.onclick = () => {#}
+{#                    window.location.href = `/chat_test?conversation_id=${item.conversation_id}`;#}
+{#                };#}
+{#                list.appendChild(li);#}
+{#            });#}
+{#        });#}
+{#    }#}
+{##}
+{#    function loadHistory() {#}
+{#        if (!conversationId) return;#}
+{#        fetch(`/llm/conversation_history?conversation_id=${encodeURIComponent(conversationId)}`, {#}
+{#            credentials: 'include'#}
+{#        })#}
+{#        .then(res => res.json())#}
+{#        .then(data => {#}
+{#            (data.messages || []).forEach(msg => {#}
+{#                addMessage(msg.content, msg.role);#}
+{#            });#}
+{#        });#}
+{#    }#}
+{##}
+{#    function addMessage(text, role) {#}
+{#        const div = document.createElement('div');#}
+{#        div.className = 'message ' + (role === 'user' ? 'user' : 'assistant');#}
+{#        div.textContent = text;#}
+{#        messagesContainer.appendChild(div);#}
+{#        messagesContainer.scrollTop = messagesContainer.scrollHeight;#}
+{#    }#}
+{##}
+{#    function sendMessage() {#}
+{#        const input = document.getElementById('query');#}
+{#        const query = input.value.trim();#}
+{#        if (!query || !conversationId) return;#}
+{##}
+{#        input.value = '';#}
+{#        addMessage(query, 'user');#}
+{##}
+{#        const eventSource = new EventSource(`/llm/deepseek?query=${encodeURIComponent(query)}&conversation_id=${conversationId}`);#}
+{#        let assistantMsg = '';#}
+{#        const assistantDiv = document.createElement('div');#}
+{#        assistantDiv.className = 'message assistant';#}
+{#        assistantDiv.textContent = '';#}
+{#        messagesContainer.appendChild(assistantDiv);#}
+{##}
+{#        eventSource.onmessage = function (event) {#}
+{#            if (event.data === '[DONE]') {#}
+{#                eventSource.close();#}
+{#            } else {#}
+{#                assistantMsg += event.data;#}
+{#                assistantDiv.textContent = assistantMsg;#}
+{#                messagesContainer.scrollTop = messagesContainer.scrollHeight;#}
+{#            }#}
+{#        };#}
+{##}
+{#        eventSource.onerror = function () {#}
+{#            eventSource.close();#}
+{#            assistantDiv.textContent += '\n[出错，连接中断]';#}
+{#        };#}
+{#    }#}
+{##}
+{#    window.onload = function () {#}
+{#        loadConversationList();#}
+{#        loadHistory();#}
+{#    };#}
+{#</script>#}
+{#</body>#}
+{#</html>#}
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>聊天界面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 为滚动条添加简单样式 */
+    /* 仅对 Webkit 生效，可根据需要扩展 */
+    #messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    #messages::-webkit-scrollbar-thumb {
+      background-color: rgba(107,114,128,0.5);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex">
+  <!-- 左侧对话列表 -->
+  <aside class="w-64 bg-white shadow-xl border-r border-gray-200 p-4 flex flex-col">
+    <div class="mb-4">
+      <h4 class="text-xl font-bold text-gray-800 mb-2">对话列表</h4>
+      <button onclick="createNewConversation()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition">新建对话</button>
+    </div>
+    <ul id="conversation-list" class="flex-1 overflow-y-auto space-y-2">
+      <!-- 动态添加对话项 -->
+    </ul>
+  </aside>
+
+  <!-- 右侧聊天窗口 -->
+  <div id="chat-container" class="flex-1 flex flex-col bg-gray-100">
+    <!-- 聊天头部 -->
+    <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+      <h2 class="text-2xl font-semibold text-gray-700">Chat with Assistant</h2>
+      <a href="{{ url_for('home') }}" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md transition">返回主页</a>
+    </header>
+
+    <!-- 聊天信息区域 -->
+    <main id="messages" class="flex-1 p-6 overflow-y-auto space-y-3 bg-white border-t border-b border-gray-200">
+      <!-- 消息动态加载 -->
+    </main>
+
+    <!-- 输入框 -->
+    <footer class="bg-white px-6 py-4">
+      <div id="input-box" class="flex space-x-2">
+        <input type="text" id="query" placeholder="请输入你的问题" class="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button id="send-btn" onclick="sendMessage()" class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-md transition">发送</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 脚本部分 -->
+  <script>
+    const messagesContainer = document.getElementById('messages');
+    const conversationId = getConversationIdFromUrl();
+
+    function getConversationIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('conversation_id') || '';
+    }
+
+    function generateRandomId(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function createNewConversation() {
+      const newId = generateRandomId(10);
+      fetch('/llm/create_conversation', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversation_id: newId,
+          summary: '新会话'
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+          window.location.href = `/chat_test?conversation_id=${encodeURIComponent(newId)}`;
+      })
+      .catch(err => alert("创建失败: " + err.message));
+    }
+
+    function loadConversationList() {
+      fetch('/llm/list', { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('conversation-list');
+          list.innerHTML = '';
+          (data.data || []).forEach(item => {
+            const li = document.createElement('li');
+            li.className = "p-2 bg-gray-50 hover:bg-gray-100 rounded cursor-pointer transition";
+            li.textContent = item.summary || item.conversation_id;
+            li.onclick = () => {
+                window.location.href = `/chat_test?conversation_id=${item.conversation_id}`;
+            };
+            list.appendChild(li);
+          });
+        });
+    }
+
+    function loadHistory() {
+      if (!conversationId) return;
+      fetch(`/llm/conversation_history?conversation_id=${encodeURIComponent(conversationId)}`, {
+        credentials: 'include'
+      })
+      .then(res => res.json())
+      .then(data => {
+        (data.messages || []).forEach(msg => {
+          addMessage(msg.content, msg.role);
+        });
+      });
+    }
+
+    function addMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = 'message max-w-[80%] px-4 py-2 rounded-lg';
+      if (role === 'user') {
+        div.classList.add('bg-blue-100', 'self-end');
+      } else {
+        div.classList.add('bg-gray-200', 'self-start');
+      }
+      div.textContent = text;
+      messagesContainer.appendChild(div);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('query');
+      const query = input.value.trim();
+      if (!query || !conversationId) return;
+
+      input.value = '';
+      addMessage(query, 'user');
+
+      const eventSource = new EventSource(`/llm/deepseek?query=${encodeURIComponent(query)}&conversation_id=${conversationId}`);
+      let assistantMsg = '';
+      const assistantDiv = document.createElement('div');
+      assistantDiv.className = 'message bg-gray-200 max-w-[80%] px-4 py-2 rounded-lg self-start';
+      assistantDiv.textContent = '';
+      messagesContainer.appendChild(assistantDiv);
+
+      eventSource.onmessage = function (event) {
+        if (event.data === '[DONE]') {
+          eventSource.close();
+        } else {
+          assistantMsg += event.data;
+          assistantDiv.textContent = assistantMsg;
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      };
+
+      eventSource.onerror = function () {
+        eventSource.close();
+        assistantDiv.textContent += '\n[出错，连接中断]';
+      };
+    }
+
+    window.onload = function () {
+      loadConversationList();
+      loadHistory();
+    };
+  </script>
+</body>
+</html>

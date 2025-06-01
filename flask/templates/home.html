@@ -1,0 +1,78 @@
+{#<!DOCTYPE html>#}
+{#<html lang="zh-CN">#}
+{#<head>#}
+{#    <meta charset="UTF-8" />#}
+{#    <title>主页</title>#}
+{#    <style>#}
+{#        body { font-family: Arial, sans-serif; background: #e8f0fe; }#}
+{#        .container { max-width: 600px; margin: 100px auto; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 0 15px #ccc; text-align: center; }#}
+{#        h1 { color: #333; }#}
+{#        a.logout {#}
+{#            display: inline-block;#}
+{#            margin-top: 20px;#}
+{#            padding: 10px 20px;#}
+{#            background: #dc3545;#}
+{#            color: white;#}
+{#            text-decoration: none;#}
+{#            border-radius: 5px;#}
+{#            font-weight: bold;#}
+{#        }#}
+{#        a.logout:hover {#}
+{#            background: #a71d2a;#}
+{#        }#}
+{#    </style>#}
+{#</head>#}
+{#<body>#}
+{#    <div class="container">#}
+{#        <h1>欢迎，{{ username }}！</h1>#}
+{#        <p>这是主页内容，你已经成功登录。</p>#}
+{#        <a class="logout" href="{{ url_for('logout') }}">退出登录</a>#}
+{#        <a class="logout" href="/deepseek_test">deepseek测试</a>#}
+{#        <a class="logout" href="/conversation_test">conversation历史记录测试</a>#}
+{#        <a class="logout" href="/chat_test">chat测试</a>#}
+{#    </div>#}
+{#</body>#}
+{#</html>#}
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>主页 - 一站式大模型平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-cover bg-center min-h-screen" style="background-image: url('https://source.unsplash.com/1600x900/?technology,ai');">
+
+  <!-- 顶部导航栏 -->
+  <header class="bg-white/80 backdrop-blur-sm shadow-md py-4 px-6 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center">
+    <div class="flex items-center gap-4">
+
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="平台Logo" class="w-32 h-12">
+
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-800">欢迎，{{ username }}！</h1>
+    </div>
+    <a href="{{ url_for('logout') }}" class="mt-4 sm:mt-0 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition">
+      退出登录
+    </a>
+  </header>
+
+  <!-- 主体内容区域 -->
+  <main class="max-w-2xl mx-auto mt-16 p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl">
+    <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">功能导航</h2>
+    <div class="flex flex-col gap-4">
+      <a href="/deepseek_test" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center transition">
+        DeepSeek 测试
+      </a>
+      <a href="/conversation_test" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center transition">
+        Conversation 历史记录测试
+      </a>
+      <a href="/chat_test" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg text-center transition">
+        Chat 测试
+      </a>
+    </div>
+  </main>
+
+</body>
+</html>
+
