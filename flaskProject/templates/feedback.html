@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提交反馈</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 150px;
+            transition: border 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        textarea::placeholder {
+            color: #adb5bd;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+            opacity: 1;
+        }
+
+        .error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+            opacity: 1;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .char-count {
+            text-align: right;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>反馈提交</h2>
+
+    <div class="form-group">
+        <textarea id="message" rows="6" placeholder="请详细描述您遇到的问题或建议..."></textarea>
+        <div class="char-count"><span id="char-count">0</span>/500</div>
+    </div>
+
+    <button id="submit-btn" class="btn" onclick="submitFeedback()">
+        提交反馈
+    </button>
+
+    <p id="result"></p>
+</div>
+
+<script>
+    const messageInput = document.getElementById('message');
+    const charCount = document.getElementById('char-count');
+    const submitBtn = document.getElementById('submit-btn');
+    const resultElement = document.getElementById('result');
+
+    // 实时字符计数
+    messageInput.addEventListener('input', () => {
+        const count = messageInput.value.length;
+        charCount.textContent = count;
+
+        if (count > 500) {
+            charCount.style.color = 'var(--error-color)';
+        } else {
+            charCount.style.color = '#6c757d';
+        }
+    });
+
+    async function submitFeedback() {
+        const message = messageInput.value.trim();
+
+        // 验证
+        if (!message) {
+            showResult('反馈内容不能为空', 'error');
+            return;
+        }
+
+        if (message.length > 500) {
+            showResult('反馈内容不能超过500个字符', 'error');
+            return;
+        }
+
+        // 禁用按钮并显示加载状态
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="loading"></div>提交中...';
+
+        try {
+            const response = await fetch("/feedback", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({message})
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showResult(result.message || '反馈提交成功！', 'success');
+                messageInput.value = ''; // 清空输入框
+                charCount.textContent = '0';
+            } else {
+                showResult(result.error || '提交失败，请稍后再试', 'error');
+            }
+        } catch (error) {
+            showResult('网络错误，请检查连接后重试', 'error');
+            console.error('提交反馈出错:', error);
+        } finally {
+            // 恢复按钮状态
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '提交反馈';
+        }
+    }
+
+    function showResult(message, type) {
+        resultElement.textContent = message;
+        resultElement.className = type;
+
+        // 3秒后淡出结果
+        setTimeout(() => {
+            resultElement.style.opacity = '0';
+        }, 3000);
+    }
+</script>
+</body>
+</html>

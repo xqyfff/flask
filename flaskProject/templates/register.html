@@ -1,0 +1,246 @@
+<!--?<!DOCTYPE html>-->
+<!--?<html lang="zh-CN">-->
+<!--?<head>-->
+<!--?    <meta charset="UTF-8"/>-->
+<!--?    <title>用户注册</title>-->
+<!--?    <style>-->
+<!--?        body {-->
+<!--?            font-family: Arial, sans-serif;-->
+<!--?            background: #f0f2f5;-->
+<!--?        }-->
+
+<!--?        .container {-->
+<!--?            max-width: 400px;-->
+<!--?            margin: 100px auto;-->
+<!--?            padding: 20px;-->
+<!--?            background: white;-->
+<!--?            border-radius: 8px;-->
+<!--?            box-shadow: 0 0 10px #ccc;-->
+<!--?        }-->
+
+<!--?        h2 {-->
+<!--?            text-align: center;-->
+<!--?            margin-bottom: 20px;-->
+<!--?        }-->
+
+<!--?        label {-->
+<!--?            display: block;-->
+<!--?            margin-top: 10px;-->
+<!--?        }-->
+
+<!--?        input[type=text], input[type=password] {-->
+<!--?            width: 100%;-->
+<!--?            padding: 8px;-->
+<!--?            margin-top: 5px;-->
+<!--?            box-sizing: border-box;-->
+<!--?        }-->
+
+<!--?        button {-->
+<!--?            width: 100%;-->
+<!--?            margin-top: 20px;-->
+<!--?            padding: 10px;-->
+<!--?            background: #28a745;-->
+<!--?            color: white;-->
+<!--?            border: none;-->
+<!--?            border-radius: 4px;-->
+<!--?            cursor: pointer;-->
+<!--?        }-->
+
+<!--?        button:hover {-->
+<!--?            background: #218838;-->
+<!--?        }-->
+
+<!--?        .message {-->
+<!--?            color: red;-->
+<!--?            text-align: center;-->
+<!--?            margin-top: 10px;-->
+<!--?        }-->
+
+<!--?        .login-link {-->
+<!--?            margin-top: 15px;-->
+<!--?            text-align: center;-->
+<!--?        }-->
+
+<!--?        .login-link a {-->
+<!--?            color: #007bff;-->
+<!--?            text-decoration: none;-->
+<!--?        }-->
+
+<!--?        .login-link a:hover {-->
+<!--?            text-decoration: underline;-->
+<!--?        }-->
+<!--?    </style>-->
+<!--?</head>-->
+<!--?<body>-->
+<!--?<div class="container">-->
+<!--?    <h2>用户注册</h2>-->
+<!--?    {% with messages = get_flashed_messages() %}-->
+<!--?        {% if messages %}-->
+<!--?            <div class="message">-->
+<!--?                {% for msg in messages %}-->
+<!--?                    <p>{{ msg }}</p>-->
+<!--?                {% endfor %}-->
+<!--?            </div>-->
+<!--?        {% endif %}-->
+<!--?    {% endwith %}-->
+<!--?    <form method="POST" action="{{ url_for('register') }}">-->
+<!--?        <label for="username">用户名：</label>-->
+<!--?        <input type="text" id="username" name="username" required autofocus/>-->
+
+<!--?        <label for="password">密码：</label>-->
+<!--?        <input type="password" id="password" name="password" required/>-->
+
+<!--?        <label for="confirm_password">确认密码：</label>-->
+<!--?        <input type="password" id="confirm_password" name="confirm_password" required/>-->
+
+<!--?        <button type="submit">注册</button>-->
+<!--?    </form>-->
+<!--?    <div class="login-link">-->
+<!--?        已有账号？<a href="{{ url_for('login') }}">去登录</a>-->
+<!--?    </div>-->
+<!--?</div>-->
+<!--?</body>-->
+<!--?</html>-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <title>用户注册 - 一站式大模型平台</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                background: linear-gradient(135deg, #1f1c2c, #928dab);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                padding: 1rem;
+            }
+
+            .glass-card {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 16px;
+                padding: 2rem;
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+
+            .glass-card input {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                padding: 0.75rem 1rem;
+                width: 100%;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                color: white;
+                font-size: 1rem;
+                outline: none;
+                transition: background 0.3s;
+            }
+
+            .glass-card input:focus {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .glass-card button {
+                background: linear-gradient(90deg, #667eea, #764ba2);
+                color: white;
+                width: 100%;
+                padding: 0.75rem;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .glass-card button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(118, 75, 162, 0.4);
+            }
+
+            .register-link a {
+                color: #a29bfe;
+                text-decoration: underline;
+                transition: color 0.2s ease;
+            }
+
+            .register-link a:hover {
+                color: #dfe6e9;
+            }
+
+            .message {
+                color: #ff6b6b;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+        </style>
+    </head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<!-- 大标题 -->
+  <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-8 drop-shadow-lg tracking-wide text-center">
+    一站式大模型访问平台
+  </h1>
+    <div class="max-w-md w-full bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 card-animate">
+        <h2 class="text-3xl font-bold text-center text-white mb-6 tracking-wide drop-shadow">
+            用户注册
+        </h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {% for msg in messages %}
+                        <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}" class="space-y-5">
+
+            <div>
+                <label for="username" class="block text-white mb-1">用户名：</label>
+                <input type="text" id="username" name="username" required autofocus
+                       class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+                <label for="password" class="block text-white mb-1">密码：</label>
+                <input type="password" id="password" name="password" required
+                       class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+                <label for="confirm_password" class="block text-white mb-1">确认密码：</label>
+                <input type="password" id="confirm_password" name="confirm_password" required
+                       class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition nav-btn">
+                注册
+            </button>
+        </form>
+
+        <div class="text-center text-white mt-6">
+            已有账号？
+            <a href="{{ url_for('login') }}" class="text-blue-400 hover:text-blue-600 font-semibold">去登录</a>
+        </div>
+    </div>
+
+<script>
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
